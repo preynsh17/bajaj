@@ -1,0 +1,66 @@
+name: Build and Package Spring Boot Application
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+        
+    - name: Cache Maven packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+        
+    - name: Build with Maven
+      run: mvn clean package -DskipTests
+      
+    - name: Upload JAR artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: bajaj-finserv-health-jar
+        path: target/bajaj-finserv-health-1.0.0.jar
+        
+    - name: Create Release
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      uses: softprops/action-gh-release@v1
+      with:
+        files: target/bajaj-finserv-health-1.0.0.jar
+        tag_name: v1.0.0
+        name: Release v1.0.0
+        body: |
+          Bajaj Finserv Health Qualifier - Spring Boot Application
+          
+          ## What's New
+          - Complete Spring Boot application for Bajaj Finserv Health qualifier
+          - Automatic webhook generation and SQL problem solving
+          - JWT authentication and solution submission
+          
+          ## Files Included
+          - `bajaj-finserv-health-1.0.0.jar` - Executable JAR file
+          
+          ## How to Run
+          ```bash
+          java -jar bajaj-finserv-health-1.0.0.jar
+          ```
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
