@@ -23,7 +23,7 @@ jobs:
         cache: maven
         
     - name: Cache Maven packages
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
@@ -33,7 +33,7 @@ jobs:
       run: mvn clean package -DskipTests
       
     - name: Upload JAR artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: bajaj-finserv-health-jar
         path: target/bajaj-finserv-health-1.0.0.jar
